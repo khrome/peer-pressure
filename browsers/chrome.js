@@ -3,7 +3,9 @@ var puppeteer = require('puppeteer');
 module.exports = {
     initialize : function(options, cb){
         //return puppeteer instance
-        puppeteer.launch({headless:!options.debug}).then(function(instance){
+        puppeteer.launch({
+            headless:!options.debug
+        }).then(function(instance){
             cb(null, instance);
         }).catch(function(ex){
             cb(ex);
@@ -17,20 +19,37 @@ module.exports = {
             cb(ex);
         })
     },
-    runTests : function(page, tests, cb){
-        console.log('CH RUN TESTS!', tests);
-        console.log('SET');
+    runTests : function(page, tests, testList, cb){
+        //todo: inject deps
+        page.on('console', function(message){
+            try{
+                if(message.type().substr(0, 3) === 'log'){
+                    var text = `${message.text()}`;
+                    if(text[0] === '['){ //maybe a
+                        var data = JSON.parse(text);
+                        if(typeof data[0] === 'string'){
+                            if(data[0] === 'pass'){
+                                cb(null, data[1]);
+                            }
+                            if(data[0] === 'fail'){
+                                var error = new Error('Test Fail');
+                                error.testName = data[0].title;
+                                error.duration = data[0].duration;
+                            }
+                        }
+                    }
+                }
+            }catch(ex){ }
+        });
         page.setContent(`<html>
                 <head>
-                    <script>
-                        console.log('something')
-                    </script>
+                    <title>perr-pressure test</title>
                 </head>
-                <body><b>OMG</b></body>
+                <body>
+                    ${tests}
+                </body>
             </html>`
         ).then(function(){
-            //maybe wait for a bit?
-
         }).catch(function(ex){
             errs.push(ex);
         })

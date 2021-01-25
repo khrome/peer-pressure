@@ -6,7 +6,7 @@ var peers = require('../context').with({
     ],
     framework : require('../frameworks/mocha'),
     packager : require('../packagers/webpack'),
-    debug:true
+    //debug:true
 });
 var waitSeconds = 10;
 

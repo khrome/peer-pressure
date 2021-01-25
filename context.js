@@ -110,7 +110,6 @@ module.exports = {
                 var cb = fns.pop();
                 var errs  = [];
                 asynk.eachOfLimit(fns, fns.length, function(fn, index, done){
-                    console.log('fn', index);
                     getBrowser(
                         options,
                         options.browsers,
@@ -119,20 +118,50 @@ module.exports = {
                         function(err, browser, instance){
                             if(err) throw err;
                             var subName = desc + '-' + (fn.name || index);
-                            var body = options.framework.testBody(subName, fn);
-                            console.log('CONTEXT');
+                            var body;
+                            try{
+                                body = options.framework.testHTML(subName, fn);
+                            }catch(ex){
+                                console.log(ex);
+                            }
+                            var body = options.framework.testHTML(subName, fn);
                             browser.newContext(instance, function(err, context){
-                                console.log('TESTS');
-                                browser.runTests(context, body, function(err, results){
-                                    //todo: package code (framework + deps)
-                                    console.log(err, results);
+                                context.on('console', function(message){
+                                    if(message.type().substr(0, 3) === 'log'){
+                                        var text = `${message.text()}`;
+                                        if(text[0] !== '['){
+                                            console.log(text);
+                                        }
+                                    }
                                 });
+                                /*context.on('pageerror', ({ message }) =>
+                                    console.log(message)
+                                );
+                                /*context.on('response', response =>
+                                    console.log(`${response.status()} ${response.url()}`)
+                                );
+                                context.on('requestfailed', request =>
+                                    console.log(`${request.failure().errorText} ${request.url()}`)
+                                );*/
+                                browser.runTests(
+                                    context,
+                                    body,
+                                    [
+                                        subName
+                                    ], function(err, results){
+                                        //todo: package code (framework + deps)
+                                        if(err) errs.push(err);
+                                        //console.log('TESTS FINISHED', err, results);
+                                        done();
+                                    }
+                                );
                             });
                         }
                     );
 
                 }, function(){
-
+                    if(errs.length) cb(errs[0]);
+                    else cb();
                 });
             })
         }

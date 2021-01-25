@@ -39,6 +39,23 @@ var control = {
     testBody : function(description, testLogicFn){
         return fnsToMochaTestBody(description, [testLogicFn]);
     },
+    testHTML : function(description, testLogicFn){
+        var test = control.testBody(description, testLogicFn);
+        var html = `
+        <div id="mocha"></div>
+        <script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
+        <script src="https://cdn.rawgit.com/chaijs/chai/4.2.0/chai.js"></script>
+        <script>mocha.setup({ui:'bdd', reporter: 'json-stream'})</script>
+        <script>
+            ${test}
+        </script>
+        <script>
+            mocha.checkLeaks();
+            mocha.globals([]);
+            mocha.run();
+        </script>`
+        return html;
+    },
     test : function(description, testLogicFn, clean){
         var fn;
         if(clean){
