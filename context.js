@@ -66,10 +66,30 @@ var getBrowser = function(options, browsers, index, name, cb){
     })
 }
 
+var makeDependencies = function(packager, dependencies, cb){
+    packager.compileSource(dependencies, function(err, body){
+        setTimeout(cb, 0);
+    });
+}
+
 module.exports = {
+    handleOrphanedPromises : function(){
+        //WTF is this stupidity mocha?!?! I predicted this trashpile.
+        let unhandledRejectionExitCode = 0;
+
+        process.on("unhandledRejection", function(reason){
+            unhandledRejectionExitCode = 1;
+            throw reason;
+        });
+
+        process.prependListener("exit", function(code){
+            if(code === 0) process.exit(unhandledRejectionExitCode);
+        });
+    },
     with : function(opts){
         var options = opts || {};
         var floor = new PeerPressure.Floor(options);
+        var dependencies = options.dependencies || {};
         var control = {
             with : function(opts){
                 var newOptions = {};
@@ -97,8 +117,25 @@ module.exports = {
             cleanup : unpromisify(function(cb){
                 var browsers = Object.keys(browserInstances).map((key)=>browserInstances[key]);
                 asynk.eachOfLimit(browsers, browsers.length, function(browser, index, done){
+                    var attempts = 0;
+                    var maxAttempts = 5;
+                    var interval = 1000;
+                    var ensureShutdown = function(cb){
+                        console.log('CLOSED', arguments);
+                        if(browser && browser.process() != null){
+                            if(attempts > maxAttempts) throw new Error('Cannot shut browser down');
+                            console.log('STILL GOING');
+                            browser.process().kill('SIGINT');
+                            attempts++;
+                            setTimeout(function(){
+                                ensureShutdown(cb);
+                            }, interval);
+                        }else cb();
+                    }
                     browser.close().then(function(){
-                        done();
+                        ensureShutdown(done)
+                    }).catch(function(ex){
+                        console.log('CERR', ex);
                     })
                 }, function(){
                     cb();
@@ -116,45 +153,47 @@ module.exports = {
                         index,
                         fn.name,
                         function(err, browser, instance){
-                            if(err) throw err;
-                            var subName = desc + '-' + (fn.name || index);
-                            var body;
-                            try{
-                                body = options.framework.testHTML(subName, fn);
-                            }catch(ex){
-                                console.log(ex);
-                            }
-                            var body = options.framework.testHTML(subName, fn);
-                            browser.newContext(instance, function(err, context){
-                                context.on('console', function(message){
-                                    if(message.type().substr(0, 3) === 'log'){
-                                        var text = `${message.text()}`;
-                                        if(text[0] !== '['){
-                                            console.log(text);
+                            makeDependencies(options.packager, dependencies, function(err, jsCode){
+                                if(err) throw err;
+                                var subName = desc + '-' + (fn.name || index);
+                                var body;
+                                try{
+                                    body = options.framework.testHTML(subName, fn);
+                                }catch(ex){
+                                    console.log(ex);
+                                }
+                                var body = options.framework.testHTML(subName, fn);
+                                browser.newContext(instance, function(err, context){
+                                    context.on('console', function(message){
+                                        if(message.type().substr(0, 3) === 'log'){
+                                            var text = `${message.text()}`;
+                                            if(text[0] !== '['){
+                                                console.log(text);
+                                            }
                                         }
-                                    }
+                                    });
+                                    /*context.on('pageerror', ({ message }) =>
+                                        console.log(message)
+                                    );
+                                    /*context.on('response', response =>
+                                        console.log(`${response.status()} ${response.url()}`)
+                                    );
+                                    context.on('requestfailed', request =>
+                                        console.log(`${request.failure().errorText} ${request.url()}`)
+                                    );*/
+                                    browser.runTests(
+                                        context,
+                                        body,
+                                        [
+                                            subName
+                                        ], function(err, results){
+                                            //todo: package code (framework + deps)
+                                            if(err) errs.push(err);
+                                            //console.log('TESTS FINISHED', err, results);
+                                            done();
+                                        }
+                                    );
                                 });
-                                /*context.on('pageerror', ({ message }) =>
-                                    console.log(message)
-                                );
-                                /*context.on('response', response =>
-                                    console.log(`${response.status()} ${response.url()}`)
-                                );
-                                context.on('requestfailed', request =>
-                                    console.log(`${request.failure().errorText} ${request.url()}`)
-                                );*/
-                                browser.runTests(
-                                    context,
-                                    body,
-                                    [
-                                        subName
-                                    ], function(err, results){
-                                        //todo: package code (framework + deps)
-                                        if(err) errs.push(err);
-                                        //console.log('TESTS FINISHED', err, results);
-                                        done();
-                                    }
-                                );
                             });
                         }
                     );

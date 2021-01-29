@@ -1,14 +1,20 @@
 var should = require('chai').should();
-var peers = require('../context').with({
+var peerPressure = require('../context');
+var peers = peerPressure.with({
     browsers : [
         require('../browsers/chrome'),
         //require('../browsers/firefox')
     ],
+    dependencies : {
+        'test-module':'./test_include_root'
+    },
     framework : require('../frameworks/mocha'),
     packager : require('../packagers/webpack'),
     //debug:true
 });
 var waitSeconds = 10;
+
+peerPressure.handleOrphanedPromises();
 
 describe('karma-context', function(){
     describe('simple', function(){
@@ -23,8 +29,9 @@ describe('karma-context', function(){
             });
 
             after(function(done){
-                peers.cleanup(function(err){ done() })
-            })
+                console.log('CLEAN')
+                peers.cleanup(function(err){ console.log('CLEANdone'); done() })
+            });
         });
 
         /*

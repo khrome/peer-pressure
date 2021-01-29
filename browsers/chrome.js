@@ -21,6 +21,7 @@ module.exports = {
     },
     runTests : function(page, tests, testList, cb){
         //todo: inject deps
+        var errs = [];
         page.on('console', function(message){
             try{
                 if(message.type().substr(0, 3) === 'log'){
@@ -39,7 +40,9 @@ module.exports = {
                         }
                     }
                 }
-            }catch(ex){ }
+            }catch(ex){
+                errs.push(ex);
+            }
         });
         page.setContent(`<html>
                 <head>
@@ -52,6 +55,7 @@ module.exports = {
         ).then(function(){
         }).catch(function(ex){
             errs.push(ex);
+            cb(errs[0]);
         })
     }
 }
