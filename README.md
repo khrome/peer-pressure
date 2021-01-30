@@ -38,11 +38,14 @@ Configuration
 ```javascript
 {
     browsers : [
-        require('../browsers/chrome'),
-        require('../browsers/firefox')
+        require('peer-pressure/browsers/chrome'),
+        require('peer-pressure/browsers/firefox')
     ],
-    framework : require('../frameworks/mocha'),
-    packager : require('../packagers/webpack'),
+    dependencies : { //get shipped to the remote browser (with subdependencies)
+        'module-name': 'local_module_name_or_location'
+    },
+    framework : require('peer-pressure/frameworks/mocha'),
+    packager : require('peer-pressure/packagers/webpack')
 }
 ```
 
@@ -92,7 +95,7 @@ Case 3 : Three Subtests as a Test (Round robin browsers, using mocha)
     });
 ```
 
-Case 4 : Three Subtests as a Test (Specific browsers, using mocha)
+Case 4 : Three Subtests as a Test (Specific browsers, using mocha)[TBD]
 -------------------------------------------------------------------
 ```javascript
     define('some standard mocha test context', function(){

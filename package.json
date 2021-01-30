@@ -1,6 +1,6 @@
 {
   "name": "peer-pressure",
-  "version": "0.0.1-alpha1",
+  "version": "0.0.1-alpha2",
   "main": "context.js",
   "dependencies": {
     "@babel/core": "^7.12.10",
