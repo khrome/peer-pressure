@@ -68,7 +68,7 @@ var getBrowser = function(options, browsers, index, name, cb){
 
 var makeDependencies = function(packager, dependencies, cb){
     packager.compileSource(dependencies, function(err, body){
-        setTimeout(cb, 0);
+        cb(err, body);
     });
 }
 
@@ -118,13 +118,16 @@ module.exports = {
                 var browsers = Object.keys(browserInstances).map((key)=>browserInstances[key]);
                 asynk.eachOfLimit(browsers, browsers.length, function(browser, index, done){
                     var attempts = 0;
-                    var maxAttempts = 5;
+                    var maxAttempts = 2;
                     var interval = 1000;
                     var ensureShutdown = function(cb){
-                        console.log('CLOSED', arguments);
                         if(browser && browser.process() != null){
-                            if(attempts > maxAttempts) throw new Error('Cannot shut browser down');
-                            console.log('STILL GOING');
+                            if(attempts > maxAttempts){
+                                setTimeout(function(){
+                                    process.exit();
+                                }, 100);
+                                throw new Error('Cannot shut browser down');
+                            }
                             browser.process().kill('SIGINT');
                             attempts++;
                             setTimeout(function(){
@@ -132,11 +135,21 @@ module.exports = {
                             }, interval);
                         }else cb();
                     }
-                    browser.close().then(function(){
-                        ensureShutdown(done)
-                    }).catch(function(ex){
-                        console.log('CERR', ex);
-                    })
+                    browser.pages().then(function(pages){
+                        asynk.eachOfLimit(pages, pages.length, function(page, i, pageDone){
+                            page.close().then(function(){
+                                pageDone();
+                            });
+                        }, function(){
+                            browser.close().then(function(){
+                                ensureShutdown(done)
+                            }).catch(function(ex){
+                                console.log('CERR', ex);
+                            })
+                        })
+                    }).catch(function(err){
+                        cb(err);
+                    });
                 }, function(){
                     cb();
                 });
@@ -158,17 +171,17 @@ module.exports = {
                                 var subName = desc + '-' + (fn.name || index);
                                 var body;
                                 try{
-                                    body = options.framework.testHTML(subName, fn);
+                                    body = options.framework.testHTML(subName, fn, jsCode);
                                 }catch(ex){
                                     console.log(ex);
                                 }
-                                var body = options.framework.testHTML(subName, fn);
+                                var body = options.framework.testHTML(subName, fn, jsCode);
                                 browser.newContext(instance, function(err, context){
                                     context.on('console', function(message){
                                         if(message.type().substr(0, 3) === 'log'){
                                             var text = `${message.text()}`;
                                             if(text[0] !== '['){
-                                                console.log(text);
+                                                console.log('[REMOTE LOG] '+text);
                                             }
                                         }
                                     });

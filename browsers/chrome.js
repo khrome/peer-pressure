@@ -22,6 +22,7 @@ module.exports = {
     runTests : function(page, tests, testList, cb){
         //todo: inject deps
         var errs = [];
+        var done;
         page.on('console', function(message){
             try{
                 if(message.type().substr(0, 3) === 'log'){
@@ -30,12 +31,14 @@ module.exports = {
                         var data = JSON.parse(text);
                         if(typeof data[0] === 'string'){
                             if(data[0] === 'pass'){
+                                done = true;
                                 cb(null, data[1]);
                             }
                             if(data[0] === 'fail'){
                                 var error = new Error('Test Fail');
                                 error.testName = data[0].title;
                                 error.duration = data[0].duration;
+                                cb(error);
                             }
                         }
                     }
@@ -55,7 +58,8 @@ module.exports = {
         ).then(function(){
         }).catch(function(ex){
             errs.push(ex);
-            cb(errs[0]);
+            if(!done) cb(errs[0]);
+            else console.log(errs);
         })
     }
 }

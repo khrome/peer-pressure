@@ -1,12 +1,13 @@
 var should = require('chai').should();
+var path = require('path');
 var peerPressure = require('../context');
 var peers = peerPressure.with({
     browsers : [
         require('../browsers/chrome'),
         //require('../browsers/firefox')
     ],
-    dependencies : {
-        'test-module':'./test_include_root'
+    dependencies : { //todo: support relative path
+        'test-module':path.resolve(__dirname, 'test_include_root.js')
     },
     framework : require('../frameworks/mocha'),
     packager : require('../packagers/webpack'),
@@ -21,15 +22,18 @@ describe('karma-context', function(){
         describe('single browser tests', function(){
             this.timeout(waitSeconds * 1000);
             peers.can('start & stop without errors', function(done){
-                console.log('REMOTE LOG A');
-                done();
+                var dep = require('test-module');
+                dep.fnKey(function(){
+                    console.log('LOG A2');
+                    done();
+                });
+                console.log('LOG A');
             }, function(done){
-                console.log('REMOTE LOG B');
+                console.log('LOG B');
                 done();
             });
 
             after(function(done){
-                console.log('CLEAN')
                 peers.cleanup(function(err){ console.log('CLEANdone'); done() })
             });
         });
