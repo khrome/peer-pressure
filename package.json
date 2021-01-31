@@ -1,6 +1,6 @@
 {
   "name": "peer-pressure",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Peer to peer browser testing",
   "keywords": [
       "js",
@@ -25,13 +25,13 @@
   "main": "context.js",
   "dependencies": {
     "get-function-arguments": "^1.0.0",
+    "async": "^3.2.0",
     "object-hash": "^2.1.1",
     "string-to-stream": "^3.0.1",
     "tmp": "^0.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
-    "async": "^3.2.0",
     "babel-loader": "^8.2.2",
     "css-loader": "^5.0.1",
     "file-loader": "^6.2.0",
