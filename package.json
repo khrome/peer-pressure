@@ -1,6 +1,6 @@
 {
   "name": "peer-pressure",
-  "version": "0.0.1-alpha2",
+  "version": "0.0.2",
   "main": "context.js",
   "dependencies": {
     "get-function-arguments": "^1.0.0",
