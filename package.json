@@ -1,6 +1,27 @@
 {
   "name": "peer-pressure",
-  "version": "0.0.2",
+  "version": "0.0.3",
+  "description": "Peer to peer browser testing",
+  "keywords": [
+      "js",
+      "javascript",
+      "testing",
+      "test",
+      "remote",
+      "execution",
+      "peer",
+      "browser"
+  ],
+  "author": "Abbey Hawk Sparrow <@khrome> (http://patternweaver.com)",
+  "contributors": [],
+  "bugs": {
+    "url": "https://github.com/khrome/peer-pressure/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/khrome/peer-pressure.git"
+  },
   "main": "context.js",
   "dependencies": {
     "get-function-arguments": "^1.0.0",
