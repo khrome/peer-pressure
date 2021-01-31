@@ -1,11 +1,16 @@
-peer-pressure [pre-alpha]
+peer-pressure [prerelease 2]
 =============
+
+Simple P2P integration testing.
+
+`peer-pressure` is a simple extension to your current testing frameworks to add browser testing in the background, through the existing interfaces, rather than building another "runner" solution. in this way we can get parallel subtests executing as tests in the respective browser, but all assemble to a single test target in the test suite.
 
 This originally grew out of another project where I attempted to use existing testing projects only to find some basic assumptions had been made, not the least of which is plugins and servers do not run concurrently.
 
 Because I'm testing browser based p2p stuff the only way I could get the behaviors I needed was to start fresh.
 
-`peer-pressure` is a simple extension to your current testing frameworks to add browser testing in the background, through the existing interfaces, rather than building another "runner" solution. in this way we can get parallel subtests executing as tests in the respective browser, but all assemble to a single test target in the test suite.
+This is very early code, please file bugs! :D
+
 
 Installation
 ------------
@@ -19,33 +24,41 @@ Import
 **ES5**
 
 ```javascript
-    var peer = require('peer-pressure').with(<configuration>);
+    var peers = require('peer-pressure').with(<configuration>);
 ```
 
 **ES6**
 
 ```javascript
     import * as peerPressure from 'peer-pressure';
-    var peer = peerPressure.with(<configuration>);
+    var peers = peerPressure.with(<configuration>);
 ```
+
+Plugins
+-------
+Peer Pressure Plugins are denoted by: `ppp-<name>-<type>`. It's easy to publish your own.
+
+[browsers](https://www.npmjs.com/search?q=ppp-*-browser&ranking=quality)
+[frameworks](https://www.npmjs.com/search?q=ppp-*-framework&ranking=quality)
+[packagers](https://www.npmjs.com/search?q=ppp-*-packager&ranking=quality)
 
 Configuration
 -------------
 
-**Use Mocha + Webpack and test in Chrome + FireFox**
+Example: **Use Mocha + Webpack and test in Chrome + FireFox**
 (note these will eventually be independent modules)
 
 ```javascript
 {
     browsers : [
-        require('peer-pressure/browsers/chrome'),
-        require('peer-pressure/browsers/firefox')
+        require('ppp-chrome-browser'),
+        require('ppp-firefox-browser')
     ],
     dependencies : { //get shipped to the remote browser (with subdependencies)
         'module-name': 'local_module_name_or_location'
     },
-    framework : require('peer-pressure/frameworks/mocha'),
-    packager : require('peer-pressure/packagers/webpack')
+    framework : require('ppp-mocha-framework'),
+    packager : require('ppp-webpack-packager')
 }
 ```
 
@@ -111,3 +124,22 @@ Case 4 : Three Subtests as a Test (Specific browsers, using mocha)[TBD]
         });
     });
 ```
+
+Roadmap
+-------
+- packagers
+    - browserify
+    - UMD
+    - parcel?
+- browsers
+    - server (no browser, isolated js)
+    - local (jsdom implementation)
+    - selenium/webdriver shim
+    - safari?
+- frameworks
+    - jasmine
+- loaders : convenience to load preset configurations
+    - mocha + webpack + chrome(if no browser specified) + server
+    - mocha + parcel + chrome(if no browser specified) + server
+    - jasmine + webpack + chrome(if no browser specified) + server
+    - jasmine + parcel + chrome(if no browser specified) + server

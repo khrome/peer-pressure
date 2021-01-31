@@ -1,10 +1,8 @@
 var asynk = require('async');
-var karma = require('karma');
 var path = require('path');
 var hash = require('object-hash');
 var fs = require('fs');
-var getFnArgs = require('get-function-arguments')
-var PeerPressure = require('./puppeteer-worker.js');
+var getFnArgs = require('get-function-arguments');
 
 var unpromisify = function(func){
     return function(){ //handles promises or callback via magic
@@ -88,7 +86,6 @@ module.exports = {
     },
     with : function(opts){
         var options = opts || {};
-        var floor = new PeerPressure.Floor(options);
         var dependencies = options.dependencies || {};
         var control = {
             with : function(opts){
@@ -169,13 +166,17 @@ module.exports = {
                             makeDependencies(options.packager, dependencies, function(err, jsCode){
                                 if(err) throw err;
                                 var subName = desc + '-' + (fn.name || index);
-                                var body;
-                                try{
-                                    body = options.framework.testHTML(subName, fn, jsCode);
-                                }catch(ex){
-                                    console.log(ex);
+                                var body = {
+                                    as : function(format){
+                                        switch(format){
+                                            case 'html':
+                                                return options.framework.testHTML(subName, fn, jsCode);
+                                            case 'fn':
+                                                return fn;
+                                            default: throw new Error('unknown format:'+format);
+                                        }
+                                    }
                                 }
-                                var body = options.framework.testHTML(subName, fn, jsCode);
                                 browser.newContext(instance, function(err, context){
                                     context.on('console', function(message){
                                         if(message.type().substr(0, 3) === 'log'){

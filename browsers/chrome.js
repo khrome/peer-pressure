@@ -47,12 +47,13 @@ module.exports = {
                 errs.push(ex);
             }
         });
+        var testHTML = tests.as('html');
         page.setContent(`<html>
                 <head>
                     <title>perr-pressure test</title>
                 </head>
                 <body>
-                    ${tests}
+                    ${testHTML}
                 </body>
             </html>`
         ).then(function(){
