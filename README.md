@@ -38,8 +38,8 @@ Plugins
 -------
 Peer Pressure Plugins are denoted by: `ppp-<name>-<type>`. It's easy to publish your own.
 
-[browsers](https://www.npmjs.com/search?q=ppp-*-browser&ranking=quality)
-[frameworks](https://www.npmjs.com/search?q=ppp-*-framework&ranking=quality)
+[browsers](https://www.npmjs.com/search?q=ppp-*-browser&ranking=quality) |
+[frameworks](https://www.npmjs.com/search?q=ppp-*-framework&ranking=quality) | 
 [packagers](https://www.npmjs.com/search?q=ppp-*-packager&ranking=quality)
 
 Configuration
@@ -128,7 +128,7 @@ Case 4 : Three Subtests as a Test (Specific browsers, using mocha)[TBD]
 Roadmap
 -------
 - packagers
-    - caching
+    - caching/request merging
     - browserify
     - UMD
     - parcel?

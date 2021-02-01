@@ -1,16 +1,16 @@
 {
   "name": "peer-pressure",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Peer to peer browser testing",
   "keywords": [
-      "js",
-      "javascript",
-      "testing",
-      "test",
-      "remote",
-      "execution",
-      "peer",
-      "browser"
+    "js",
+    "javascript",
+    "testing",
+    "test",
+    "remote",
+    "execution",
+    "peer",
+    "browser"
   ],
   "author": "Abbey Hawk Sparrow <@khrome> (http://patternweaver.com)",
   "contributors": [],
@@ -40,7 +40,7 @@
     "ppp-chrome-browser": "0.0.2",
     "ppp-firefox-browser": "0.0.2",
     "ppp-mocha-framework": "0.0.2",
-    "ppp-webpack-packager": "0.0.2",
+    "ppp-webpack-packager": "0.0.4",
     "chai": "^4.2.0",
     "mocha": "^8.2.1",
     "webpack": "^5.17.0"

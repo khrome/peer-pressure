@@ -201,9 +201,8 @@ module.exports = {
                                         [
                                             subName
                                         ], function(err, results){
-                                            //todo: package code (framework + deps)
+                                            //todo: configurable err behavior
                                             if(err) errs.push(err);
-                                            //console.log('TESTS FINISHED', err, results);
                                             done();
                                         }
                                     );
@@ -213,8 +212,7 @@ module.exports = {
                     );
 
                 }, function(){
-                    if(errs.length) cb(errs[0]);
-                    else cb();
+                    cb(errs[0]);
                 });
             })
         }
